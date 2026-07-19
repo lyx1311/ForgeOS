@@ -1,0 +1,16 @@
+.secrets/
+.env
+.env.*
+!.env.example
+.forgeos/
+.worktrees/
+node_modules/
+dist/
+coverage/
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+SiliconFlow_API_Key.txt
+.install-cache/
+

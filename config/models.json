@@ -1,0 +1,58 @@
+{
+  "provider": "siliconflow",
+  "baseUrl": "https://api.siliconflow.cn/v1",
+  "routes": {
+    "fast": {
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "inputTokenLimit": 4096,
+      "outputTokenLimit": 512,
+      "jsonMode": true
+    },
+    "code": {
+      "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "inputTokenLimit": 20000,
+      "outputTokenLimit": 4096,
+      "jsonMode": true
+    },
+    "reasoning": {
+      "model": "Qwen/Qwen3.5-35B-A3B",
+      "inputTokenLimit": 16000,
+      "outputTokenLimit": 2048,
+      "jsonMode": true,
+      "enableThinking": false
+    },
+    "independentReview": {
+      "model": "deepseek-ai/DeepSeek-V3.2",
+      "inputTokenLimit": 16000,
+      "outputTokenLimit": 2048,
+      "enabled": false
+    }
+  },
+  "retry": {
+    "maxTransientAttempts": 3,
+    "maxSchemaRepairAttempts": 1,
+    "baseDelayMs": 1000
+  },
+  "budget": {
+    "warningRatio": 0.8,
+    "nodeSoftMultiplier": 2,
+    "nodeHardMultiplier": 3,
+    "monthlyRunMultiplier": 10,
+    "monthlyFloorCny": 5
+  },
+  "catalog": [
+    "deepseek-ai/DeepSeek-V3.2",
+    "deepseek-ai/DeepSeek-V3.1-Terminus",
+    "Qwen/Qwen3.5-35B-A3B",
+    "Qwen/Qwen3.5-27B",
+    "Qwen/Qwen3.5-9B",
+    "deepseek-ai/DeepSeek-R1",
+    "deepseek-ai/DeepSeek-V3",
+    "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct",
+    "Pro/Qwen/Qwen2.5-7B-Instruct",
+    "Qwen/Qwen3-Embedding-0.6B",
+    "Qwen/Qwen3-Reranker-0.6B"
+  ]
+}
+
