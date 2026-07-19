@@ -1,10 +1,10 @@
 # ForgeOS implementation state
 
-Last updated: 2026-07-19 14:22 America/Halifax
+Last updated: 2026-07-19 15:02 America/Halifax
 
 ## Current goal
 
-Complete, verify, merge, and locally deploy the ForgeOS v0.1.0 minimal end-to-end loop, then create the annotated `v0.1.0` tag.
+Maintain the released ForgeOS v0.1.0 minimal end-to-end prototype from its persistent event and Git state.
 
 ## Completed
 
@@ -14,16 +14,16 @@ Complete, verify, merge, and locally deploy the ForgeOS v0.1.0 minimal end-to-en
 - Implemented the event ledger, rebuildable SQLite projections, fact revisions, dynamic DAG, questions, evidence, model usage, Git worktrees, restricted runner broker, deployment preview, Fastify API, SSE, and browser UI.
 - Verified SiliconFlow Chat Completions and JSON mode with `Qwen/Qwen2.5-7B-Instruct`.
 - Previously passed TypeScript checks, build, 32 tests, Compose build/health, and a zero-vulnerability production dependency audit.
+- Added deterministic extraction/planning fallbacks, normalized model candidates, bounded repair/recovery, selective fact invalidation, SHA revalidation, and deploy-only recovery.
+- Completed the two-requirement live loop, merged `feat/mvp` into `main`, migrated runtime repositories to root `.forgeos/workspaces`, rebuilt Compose from `main`, and created annotated tag `v0.1.0`.
 
 ## Current blocker
 
-- No implementation blocker remains. Release packaging, Git merge, final main deployment, and tagging are pending.
+- None for the v0.1.0 local single-user scope.
 
 ## Pending
 
-1. Run the final release gate from the feature worktree and record the exact results.
-2. Commit `feat/mvp`, merge into `main`, migrate runtime workspaces, and rebuild from `main`.
-3. Verify recovery from the main checkout, create annotated tag `v0.1.0`, and remove the feature worktree.
+- No v0.1.0 release task remains. Future work starts from a new versioned goal and must preserve the event ledger and compatibility boundaries below.
 
 ## Important constraints
 
@@ -55,3 +55,4 @@ Complete, verify, merge, and locally deploy the ForgeOS v0.1.0 minimal end-to-en
 - Real fact-boundary check kept requirement 1 pending while requirement 2 revision 1 became stale and revision 2 received a reconciliation DAG.
 - In-app browser showed chat, DAG, ledger, evidence/cost, and the target preview with no console errors.
 - Key scan found no secret in source, SQLite, APIs, logs, or image history. ForgeOS has no Docker socket; broker has no model key or database mount.
+- Final `main` Compose has both services running, ForgeOS health `ok`, project sequence 335, target preview HTTP 200, and a clean Git worktree; the feature worktree was safely removed after migration.
