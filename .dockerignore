@@ -1,0 +1,10 @@
+.git
+.worktrees
+.forgeos
+.secrets
+.env*
+node_modules
+dist
+coverage
+*.log
+*.sqlite*

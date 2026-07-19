@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ForgeOS — 用自然语言运行一个持久化的软件工程组织。" />
+    <title>ForgeOS · Persistent Engineering</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="ForgeOS 首页">
+          <span class="mark" aria-hidden="true"><i></i></span>
+          <span><strong>ForgeOS</strong><small>Persistent engineering runtime</small></span>
+        </a>
+        <div class="project-switcher">
+          <label for="project-select">当前项目</label>
+          <select id="project-select" aria-label="切换项目"><option value="">新项目</option></select>
+        </div>
+        <div id="health" class="health"><span></span>正在连接</div>
+      </header>
+
+      <main class="workspace">
+        <section class="conversation panel" aria-labelledby="conversation-title">
+          <div class="panel-heading">
+            <div><span class="eyebrow">COMMAND CHANNEL</span><h1 id="conversation-title">用一句话启动工程</h1></div>
+            <span id="project-status" class="status-chip">等待输入</span>
+          </div>
+          <div id="question-banner" class="question-banner" hidden></div>
+          <div id="messages" class="messages" aria-live="polite">
+            <div class="empty-state">
+              <span class="empty-index">01</span>
+              <h2>描述你想创造或改变什么</h2>
+              <p>ForgeOS 会把需求、决策、任务、代码和证据写入持久化账本。批准方案后，它将自行实现并验证。</p>
+              <div class="example">例如：创建一个可记录每日习惯的轻量 Web 应用，支持连续天数统计。</div>
+            </div>
+          </div>
+          <form id="composer" class="composer">
+            <label class="sr-only" for="message-input">自然语言指令</label>
+            <textarea id="message-input" rows="3" placeholder="输入需求、回答问题，或批准/否决方案…" required></textarea>
+            <div class="composer-footer">
+              <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 发送</span>
+              <button id="send-button" type="submit">发送指令 <b>↗</b></button>
+            </div>
+          </form>
+        </section>
+
+        <section class="operations">
+          <article class="panel graph-panel" aria-labelledby="graph-title">
+            <div class="panel-heading compact">
+              <div><span class="eyebrow">LIVE DAG</span><h2 id="graph-title">工程任务图</h2></div>
+              <span id="task-count" class="metric">0 节点</span>
+            </div>
+            <div id="task-graph" class="task-graph"><p class="muted">方案生成后，任务依赖会出现在这里。</p></div>
+          </article>
+
+          <div class="lower-grid">
+            <article class="panel timeline-panel" aria-labelledby="timeline-title">
+              <div class="panel-heading compact"><div><span class="eyebrow">LEDGER</span><h2 id="timeline-title">事件时间线</h2></div></div>
+              <ol id="timeline" class="timeline"><li class="muted">尚无事件</li></ol>
+            </article>
+            <aside class="panel evidence-panel" aria-labelledby="evidence-title">
+              <div class="panel-heading compact"><div><span class="eyebrow">EVIDENCE</span><h2 id="evidence-title">验证与成本</h2></div></div>
+              <div class="stats">
+                <div><span id="evidence-count">0</span><small>证据</small></div>
+                <div><span id="token-count">0</span><small>Tokens</small></div>
+                <div><span id="deployment-count">0</span><small>部署</small></div>
+              </div>
+              <div id="latest-deployment" class="deployment muted">暂无已验证部署</div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
