@@ -1,0 +1,71 @@
+name: forgeos
+
+x-forgeos-image: &forgeos-image
+  image: forgeos-local:0.1.0
+  build:
+    context: .
+    dockerfile: Dockerfile
+
+services:
+  runner-broker:
+    <<: *forgeos-image
+    command: ["npm", "run", "start:broker"]
+    user: "0:0"
+    environment:
+      BROKER_HOST: 0.0.0.0
+      BROKER_PORT: 4001
+      BROKER_TOKEN_FILE: /run/secrets/runner_broker_token
+      WORKSPACE_ROOT: /workspaces
+      HOST_WORKSPACE_ROOT: ${FORGEOS_HOST_WORKSPACE_ROOT}
+      RUNNER_IMAGE: mcr.microsoft.com/devcontainers/javascript-node:24-bookworm
+    secrets:
+      - runner_broker_token
+    volumes:
+      - type: bind
+        source: ./.forgeos/workspaces
+        target: /workspaces
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    networks: [control]
+    restart: unless-stopped
+
+  forgeos:
+    <<: *forgeos-image
+    depends_on: [runner-broker]
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      FORGEOS_DB_PATH: /data/forgeos.sqlite
+      FORGEOS_WORKSPACE_ROOT: /workspaces
+      MODEL_CONFIG_PATH: /app/dist/config/models.json
+      SILICONFLOW_API_KEY_FILE: /run/secrets/siliconflow_api_key
+      BROKER_URL: http://runner-broker:4001
+      BROKER_TOKEN_FILE: /run/secrets/runner_broker_token
+    secrets:
+      - siliconflow_api_key
+      - runner_broker_token
+    volumes:
+      - forgeos-state:/data
+      - type: bind
+        source: ./.forgeos/workspaces
+        target: /workspaces
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks: [control, egress]
+    restart: unless-stopped
+
+networks:
+  control:
+    internal: true
+  egress: {}
+
+volumes:
+  forgeos-state:
+
+secrets:
+  siliconflow_api_key:
+    file: ${SILICONFLOW_SECRET_FILE:-./.secrets/siliconflow_api_key}
+  runner_broker_token:
+    file: ${BROKER_TOKEN_FILE:-./.secrets/runner_broker_token}

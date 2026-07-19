@@ -31,7 +31,8 @@
   "retry": {
     "maxTransientAttempts": 3,
     "maxSchemaRepairAttempts": 1,
-    "baseDelayMs": 1000
+    "baseDelayMs": 1000,
+    "requestTimeoutMs": 120000
   },
   "budget": {
     "warningRatio": 0.8,
