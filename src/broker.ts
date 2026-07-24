@@ -40,6 +40,11 @@ const previewRequestSchema = z.object({
   relativeWorktree: z.string().min(1).max(512),
 }).strict();
 
+const recoverPreviewRequestSchema = z.object({
+  runId: z.string().uuid(),
+  containerId: z.string().regex(/^[a-f0-9]{12,64}$/iu),
+}).strict();
+
 export type BrokerCommandId = keyof typeof COMMANDS;
 
 export interface BrokerRunRequest {
@@ -72,6 +77,18 @@ export interface BrokerPreviewResult {
   url: string;
   buildLog: string;
   logTruncated: boolean;
+}
+
+export interface BrokerRecoverPreviewRequest {
+  runId: string;
+  containerId: string;
+}
+
+export interface BrokerRecoverPreviewResult {
+  runId: string;
+  imageRef: string;
+  containerId: string;
+  url: string;
 }
 
 export interface BrokerOptions {
@@ -291,7 +308,7 @@ export function createBroker(options: BrokerOptions = {}): FastifyInstance {
       HostConfig: {
         NetworkMode: "none",
         ReadonlyRootfs: true,
-        Binds: [`${hostPath(hostWorkspaceRoot, worktree.segments)}:${CONTAINER_WORKSPACE}:rw`],
+        Binds: [`${hostPath(hostWorkspaceRoot, worktree.segments)}:${CONTAINER_WORKSPACE}:ro`],
         CapDrop: ["ALL"],
         SecurityOpt: ["no-new-privileges:true"],
         Memory: 512 * MEBIBYTE,
@@ -365,7 +382,7 @@ export function createBroker(options: BrokerOptions = {}): FastifyInstance {
         PidsLimit: 64,
         Tmpfs: { "/tmp": "rw,noexec,nosuid,size=32m,uid=1000,gid=1000" },
         PortBindings: { [PREVIEW_PORT]: [{ HostIp: "127.0.0.1", HostPort: "" }] },
-        RestartPolicy: { Name: "no" },
+        RestartPolicy: { Name: "unless-stopped" },
       },
     });
     try {
@@ -386,6 +403,32 @@ export function createBroker(options: BrokerOptions = {}): FastifyInstance {
       await container.remove({ force: true }).catch(() => undefined);
       throw error;
     }
+  });
+
+  app.post("/recover-preview", async (request): Promise<BrokerRecoverPreviewResult> => {
+    const input = recoverPreviewRequestSchema.parse(request.body) as BrokerRecoverPreviewRequest;
+    const container = docker.getContainer(input.containerId);
+    let inspection;
+    try {
+      inspection = await container.inspect();
+    } catch {
+      throw new BrokerError(404, "PREVIEW_NOT_FOUND", "Managed preview container was not found");
+    }
+    const labels = inspection.Config?.Labels ?? {};
+    if (labels["forgeos.managed"] !== "true" || labels["forgeos.kind"] !== "preview" || labels["forgeos.run-id"] !== input.runId) {
+      throw new BrokerError(404, "PREVIEW_NOT_FOUND", "Container is not the requested managed preview");
+    }
+    if (!inspection.State.Running) await container.start();
+    await waitForHealthy(container, previewTimeoutMs);
+    inspection = await container.inspect();
+    const binding = inspection.NetworkSettings.Ports[PREVIEW_PORT]?.[0];
+    if (!binding?.HostPort) throw new BrokerError(500, "PREVIEW_PORT_MISSING", "Docker did not publish a preview port");
+    return {
+      runId: input.runId,
+      imageRef: inspection.Config.Image,
+      containerId: container.id,
+      url: `http://127.0.0.1:${binding.HostPort}`,
+    };
   });
 
   return app;

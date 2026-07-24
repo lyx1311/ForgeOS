@@ -61,6 +61,7 @@ export async function createServer(options: ServerOptions = {}): Promise<Fastify
     workspaceRoot,
   });
   orchestrator.recoverIncompleteProjects();
+  await orchestrator.recoverDeployments();
   const app = Fastify({ logger: options.logger ?? process.env.NODE_ENV !== "test", bodyLimit: 64 * 1024 });
 
   app.setErrorHandler((error, _request, reply) => {

@@ -26,6 +26,7 @@ interface MockContainer {
 
 interface MockDocker {
   createContainer: ReturnType<typeof vi.fn>;
+  getContainer: ReturnType<typeof vi.fn>;
   buildImage: ReturnType<typeof vi.fn>;
   modem: { followProgress: ReturnType<typeof vi.fn> };
   specifications: Array<Record<string, unknown>>;
@@ -42,6 +43,7 @@ function mockContainer(overrides: Partial<MockContainer> = {}): MockContainer {
     remove: vi.fn().mockResolvedValue(undefined),
     inspect: vi.fn().mockResolvedValue({
       State: { Running: true, Health: { Status: "healthy" } },
+      Config: { Image: `forgeos-preview:${RUN_ID}`, Labels: { "forgeos.managed": "true", "forgeos.kind": "preview", "forgeos.run-id": RUN_ID } },
       NetworkSettings: { Ports: { "3000/tcp": [{ HostIp: "127.0.0.1", HostPort: "49123" }] } },
     }),
     ...overrides,
@@ -50,12 +52,18 @@ function mockContainer(overrides: Partial<MockContainer> = {}): MockContainer {
 
 function mockDocker(containers: MockContainer[]): MockDocker {
   const specifications: Array<Record<string, unknown>> = [];
+  const available = [...containers];
   return {
     specifications,
     createContainer: vi.fn(async (specification: Record<string, unknown>) => {
       specifications.push(specification);
       const container = containers.shift();
       if (!container) throw new Error("No mock container queued");
+      return container;
+    }),
+    getContainer: vi.fn((id: string) => {
+      const container = available.find((item) => item.id === id);
+      if (!container) throw new Error("Mock container not found");
       return container;
     }),
     buildImage: vi.fn(async (context: Readable) => {
@@ -151,7 +159,8 @@ describe("runner broker", () => {
       SecurityOpt: ["no-new-privileges:true"],
       PidsLimit: 64,
     });
-    expect(specification.HostConfig.Binds).toEqual([`/host/workspaces/${PROJECT_ID}/${TASK_ID}:/workspace:rw`]);
+    expect(specification.HostConfig.Binds).toEqual([`/host/workspaces/${PROJECT_ID}/${TASK_ID}:/workspace:ro`]);
+    expect(specification.HostConfig.Tmpfs).toMatchObject({ "/tmp": expect.stringContaining("rw") });
     expect(container.remove).toHaveBeenCalledWith({ force: true });
     await app.close();
   });
@@ -235,6 +244,7 @@ describe("runner broker", () => {
       CapDrop: ["ALL"],
       SecurityOpt: ["no-new-privileges:true"],
       PortBindings: { "3000/tcp": [{ HostIp: "127.0.0.1", HostPort: "" }] },
+      RestartPolicy: { Name: "unless-stopped" },
     });
     expect(specification.HostConfig).not.toHaveProperty("Binds");
     expect(specification.Labels["forgeos.run-id"]).toBe(RUN_ID);
@@ -262,6 +272,32 @@ describe("runner broker", () => {
     expect(response.statusCode).toBe(400);
     expect(response.json().error).toBe("INVALID_DOCKERFILE");
     expect(docker.buildImage).not.toHaveBeenCalled();
+    await app.close();
+  });
+
+  it("recovers only the labelled preview and returns its current port", async () => {
+    const containerId = "a".repeat(64);
+    const preview = mockContainer({ id: containerId });
+    const docker = mockDocker([preview]);
+    const app = createBroker({ docker: docker as unknown as Docker, token: TOKEN, workspaceRoot: ".", hostWorkspaceRoot: "/host/workspaces" });
+    const response = await app.inject({ method: "POST", url: "/recover-preview",
+      headers: { authorization: `Bearer ${TOKEN}` }, payload: { runId: RUN_ID, containerId } });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ runId: RUN_ID, imageRef: `forgeos-preview:${RUN_ID}`, containerId, url: "http://127.0.0.1:49123" });
+    expect(docker.getContainer).toHaveBeenCalledWith(containerId);
+    await app.close();
+  });
+
+  it("refuses to recover a container without matching ForgeOS labels", async () => {
+    const containerId = "b".repeat(64);
+    const preview = mockContainer({ id: containerId, inspect: vi.fn().mockResolvedValue({
+      State: { Running: true }, Config: { Image: "foreign", Labels: {} }, NetworkSettings: { Ports: {} },
+    }) });
+    const app = createBroker({ docker: mockDocker([preview]) as unknown as Docker, token: TOKEN, workspaceRoot: ".", hostWorkspaceRoot: "/host/workspaces" });
+    const response = await app.inject({ method: "POST", url: "/recover-preview",
+      headers: { authorization: `Bearer ${TOKEN}` }, payload: { runId: RUN_ID, containerId } });
+    expect(response.statusCode).toBe(404);
+    expect(response.json().error).toBe("PREVIEW_NOT_FOUND");
     await app.close();
   });
 });

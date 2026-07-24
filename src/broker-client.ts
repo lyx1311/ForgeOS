@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import type {
+  BrokerRecoverPreviewRequest,
+  BrokerRecoverPreviewResult,
   BrokerPreviewRequest,
   BrokerPreviewResult,
   BrokerRunRequest,
@@ -47,6 +49,10 @@ export class BrokerClient {
 
   async preview(input: BrokerPreviewRequest): Promise<BrokerPreviewResult> {
     return await this.post<BrokerPreviewResult>("/preview", input);
+  }
+
+  async recoverPreview(input: BrokerRecoverPreviewRequest): Promise<BrokerRecoverPreviewResult> {
+    return await this.post<BrokerRecoverPreviewResult>("/recover-preview", input);
   }
 
   private async post<T>(pathname: string, body: unknown): Promise<T> {

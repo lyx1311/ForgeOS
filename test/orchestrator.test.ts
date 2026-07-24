@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { ForgeStore } from "../src/store.js";
 import { Orchestrator, type BrokerPort, type GitPort, type ModelPort } from "../src/orchestrator.js";
 
+const RUN_ID = "8c781d1c-9f7e-4d69-a7a0-89f45ef37f4c";
+
 function harness(testExitCodes: number[] = [0], reviewFailures = 0) {
   let commit = 0;
   let reviewCalls = 0;
@@ -21,6 +23,7 @@ function harness(testExitCodes: number[] = [0], reviewFailures = 0) {
     createWorktree: vi.fn(async (_r, root, node, attempt, base) => ({ path: `${root}/${node}-${attempt}`, branch: `forge/task/${node}/${attempt}`, baseCommit: base })),
     applyChanges: vi.fn(async () => undefined),
     commit: vi.fn(async () => (++commit).toString(16).padStart(40, "b")),
+    assertWorktreeAtCommit: vi.fn(async () => undefined),
     diffCheck: vi.fn(async () => ""), diff: vi.fn(async () => "diff"),
     fastForwardMerge: vi.fn(async (_r, candidate) => candidate), removeWorktree: vi.fn(async () => undefined),
   };
@@ -31,6 +34,7 @@ function harness(testExitCodes: number[] = [0], reviewFailures = 0) {
       return { ...input, containerId: "runner", exitCode, durationMs: 1, log: exitCode ? "failure" : "ok", logTruncated: false, timedOut: false, imageRef: "runner:test" };
     }),
     preview: vi.fn(async (input) => ({ ...input, imageRef: "preview:test", containerId: "preview", url: "http://127.0.0.1:1234", buildLog: "ok", logTruncated: false })),
+    recoverPreview: vi.fn(async (input) => ({ ...input, imageRef: `preview:${input.runId}`, url: "http://127.0.0.1:4321" })),
   };
   const store = new ForgeStore();
   return { store, model, git, broker, orchestrator: new Orchestrator({ store, model, git, broker, workspaceRoot: "workspaces" }) };
@@ -127,6 +131,36 @@ describe("Orchestrator", () => {
     expect(done.evidence.filter((item) => item.status === "passed").map((item) => item.kind))
       .toEqual(expect.arrayContaining(["diff_check", "test", "build", "review"]));
     expect(done.deployments[0]?.status).toBe("healthy");
+  });
+
+  it("refreshes a healthy deployment URL after Docker assigns a new port without duplicating the deployment", async () => {
+    const h = harness();
+    const project = h.store.createProject({ name: "Recovered preview" });
+    const timestamp = new Date().toISOString();
+    h.store.upsertDeployment({ id: RUN_ID, projectId: project.id, commitSha: "a".repeat(40), imageRef: `preview:${RUN_ID}`,
+      containerId: "c".repeat(64), previewUrl: "http://127.0.0.1:1111", status: "healthy", createdAt: timestamp, updatedAt: timestamp });
+    await expect(h.orchestrator.recoverDeployments()).resolves.toBe(1);
+    const deployments = h.store.getSnapshot(project.id).deployments;
+    expect(deployments).toHaveLength(1);
+    expect(deployments[0]?.previewUrl).toBe("http://127.0.0.1:4321");
+    await expect(h.orchestrator.recoverDeployments()).resolves.toBe(0);
+  });
+
+  it("stops before evidence, merge, and preview when a runner mutates the candidate worktree", async () => {
+    const h = harness();
+    let integrityChecks = 0;
+    vi.mocked(h.git.assertWorktreeAtCommit).mockImplementation(async () => {
+      integrityChecks += 1;
+      if (integrityChecks === 3) throw new Error("Worktree differs from the candidate commit");
+    });
+    const created = await h.orchestrator.createProject("build a landing page");
+    await h.orchestrator.handleMessage(created.project.id, "approve", created.questions[0]!.id);
+    await h.orchestrator.waitForIdle(created.project.id);
+    const stopped = h.store.getSnapshot(created.project.id);
+    expect(stopped.project.status).toBe("waiting_user");
+    expect(stopped.evidence.some((item) => item.kind === "test" && item.status === "passed")).toBe(false);
+    expect(h.git.fastForwardMerge).not.toHaveBeenCalled();
+    expect(h.broker.preview).not.toHaveBeenCalled();
   });
 
   it("creates a repair node and retries a failed test", async () => {

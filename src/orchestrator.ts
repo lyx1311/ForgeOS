@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { join, relative } from "node:path";
 import { z } from "zod";
-import type { BrokerPreviewResult, BrokerRunResult } from "./broker.js";
+import type { BrokerPreviewResult, BrokerRecoverPreviewResult, BrokerRunResult } from "./broker.js";
 import type { BrokerClient } from "./broker-client.js";
 import type { FileChange, GitManager, WorktreeRef } from "./git.js";
 import type { SiliconFlowGateway, ModelCallContext, ModelMessage, ModelRoute, ModelUsage } from "./model.js";
@@ -127,12 +127,14 @@ export interface BrokerPort {
   health?(): Promise<{ status: string }>;
   run(input: { commandId: "test" | "build"; runId: string; relativeWorktree: string }): Promise<BrokerRunResult>;
   preview(input: { runId: string; relativeWorktree: string }): Promise<BrokerPreviewResult>;
+  recoverPreview?(input: { runId: string; containerId: string }): Promise<BrokerRecoverPreviewResult>;
 }
 export interface GitPort {
   scaffold(repository: string): Promise<string>;
   createWorktree(repository: string, root: string, nodeId: string, attempt: number, base: string): Promise<WorktreeRef>;
   applyChanges(worktree: string, changes: FileChange[]): Promise<void>;
   commit(worktree: string, message: string): Promise<string>;
+  assertWorktreeAtCommit(worktree: string, expectedCommit: string): Promise<void>;
   diffCheck(repository: string, base?: string): Promise<string>;
   diff(repository: string, base: string, head?: string): Promise<string>;
   fastForwardMerge(repository: string, candidate: string, expectedBase: string, evidence: string[]): Promise<string>;
@@ -270,6 +272,31 @@ export class Orchestrator {
       });
       this.options.store.updateProject({ ...project, status: "failed", updatedAt: this.now() });
       recovered += 1;
+    }
+    return recovered;
+  }
+
+  async recoverDeployments(): Promise<number> {
+    if (!this.options.broker.recoverPreview) return 0;
+    let recovered = 0;
+    for (const project of this.options.store.listProjects()) {
+      const deployments = this.options.store.getSnapshot(project.id).deployments
+        .filter((deployment) => deployment.status === "healthy" && deployment.containerId !== null);
+      for (const deployment of deployments) {
+        let preview: BrokerRecoverPreviewResult | undefined;
+        for (let attempt = 0; attempt < 5 && !preview; attempt += 1) {
+          try {
+            preview = await this.options.broker.recoverPreview({ runId: deployment.id, containerId: deployment.containerId! });
+          } catch {
+            if (attempt < 4) await new Promise((resolve) => setTimeout(resolve, 250));
+          }
+        }
+        if (!preview || (preview.url === deployment.previewUrl && preview.imageRef === deployment.imageRef
+          && preview.containerId === deployment.containerId)) continue;
+        this.options.store.upsertDeployment({ ...deployment, imageRef: preview.imageRef,
+          containerId: preview.containerId, previewUrl: preview.url, updatedAt: this.now() });
+        recovered += 1;
+      }
     }
     return recovered;
   }
@@ -488,6 +515,7 @@ export class Orchestrator {
           continue;
         }
         candidate = await this.options.git.commit(worktree.path, `${kind}: ${requirement.factId} attempt ${firstAttempt + attempt}`);
+        await this.options.git.assertWorktreeAtCommit(worktree.path, candidate);
         if (repair) this.options.store.upsertTask({ ...repair, status: "succeeded", candidateCommit: candidate, updatedAt: this.now() });
         this.options.store.upsertTask({ ...implementation, status: "running", attempt: firstAttempt + attempt, baseCommit: base, candidateCommit: candidate, updatedAt: this.now() });
 
@@ -504,14 +532,18 @@ export class Orchestrator {
 
         const currentTestTask = this.options.store.getTask(testTask.id)!;
         this.options.store.upsertTask({ ...currentTestTask, status: "running", baseCommit: base, candidateCommit: candidate, attempt: firstAttempt + attempt, updatedAt: this.now() });
+        await this.options.git.assertWorktreeAtCommit(worktree.path, candidate);
         const test = await this.options.broker.run({ commandId: "test", runId: randomUUID(), relativeWorktree: this.brokerPath(worktree.path) });
+        await this.options.git.assertWorktreeAtCommit(worktree.path, candidate);
         this.brokerEvidence(projectId, testTask.id, "test", candidate, test);
         if (test.exitCode !== 0 || test.timedOut) {
           failure = `Tests failed (${test.exitCode}): ${test.log}`;
           if (attempt === 2) throw new Error(`Validation failed after two repairs: ${failure}`);
           continue;
         }
+        await this.options.git.assertWorktreeAtCommit(worktree.path, candidate);
         const build = await this.options.broker.run({ commandId: "build", runId: randomUUID(), relativeWorktree: this.brokerPath(worktree.path) });
+        await this.options.git.assertWorktreeAtCommit(worktree.path, candidate);
         this.brokerEvidence(projectId, testTask.id, "build", candidate, build);
         if (build.exitCode !== 0 || build.timedOut) {
           failure = `Build failed (${build.exitCode}): ${build.log}`;
@@ -550,6 +582,7 @@ export class Orchestrator {
         { kind: "diff_check", commandId: "git-diff-check" }, { kind: "test", commandId: "test" },
         { kind: "build", commandId: "build" }, { kind: "review", commandId: "model-review" },
       ]);
+      await this.options.git.assertWorktreeAtCommit(worktree.path, candidate);
       this.options.store.upsertChangeset({ ...changeset, candidateCommit: candidate, status: "validated", updatedAt: this.now() });
       this.options.store.upsertTask({ ...mergeTask, status: "running", baseCommit: base, candidateCommit: candidate, updatedAt: this.now() });
       const merged = await this.options.git.fastForwardMerge(repository, candidate, base, evidenceCommits);

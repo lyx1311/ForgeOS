@@ -1,4 +1,21 @@
-# ForgeOS v0.1.0 validation record
+# ForgeOS validation record
+
+## v0.1.1 security patch
+
+Date: 2026-07-25 (Asia/Taipei)
+
+- Reproduced a mutable-worktree issue where generated tests changed `server.mjs`, the build used the changed file, and passing evidence was still attributed to the original candidate SHA.
+- Runner source mounts are now read-only, while `/tmp` remains writable for legitimate temporary data.
+- The orchestrator verifies candidate HEAD and worktree cleanliness before and after test/build execution and again before merge.
+- The original PoC now stops in `waiting_user` before test evidence, review, merge, or deployment; the repository remains at its scaffold commit.
+- Updated `@fastify/static` and its `find-my-way` dependency to patched compatible releases; `npm audit --omit=dev` reports 0 vulnerabilities.
+- Preview containers use `unless-stopped`; existing managed previews are migrated once during this release so daemon and Compose restarts preserve their recorded local URLs.
+- TypeScript check, production build, and all 50 tests across 7 files pass.
+- The real Compose stack is healthy at `127.0.0.1:3000`; only the broker holds the Docker socket and it has no published host port, database mount, or model secret.
+- Restart recovery preserved project HEAD `61694a5cecdc49689798f71693f49fd7553c6a99`, 3 deployment records, and event sequence 337 while refreshing the healthy preview to `http://127.0.0.1:10781`; a second restart produced no duplicate event or deployment.
+- The SiliconFlow key is absent from tracked source, Git history, API responses, SQLite, container logs, and image history.
+
+## v0.1.0 release
 
 Date: 2026-07-19 (America/Halifax)
 

@@ -114,11 +114,11 @@ npm run dev
 npm run dev:broker
 ```
 
-发布验证记录包括 **45 项测试通过**、类型检查和生产构建成功、Compose 健康检查、重启后状态持久化、选择性事实失效、浏览器验收以及一次完整的真实交付闭环。记录证据见 [`docs/validation.md`](./docs/validation.md)。
+发布验证记录包括 **50 项测试通过**、类型检查和生产构建成功、Compose 健康检查、重启后状态持久化、选择性事实失效、浏览器验收以及一次完整的真实交付闭环。记录证据见 [`docs/validation.md`](./docs/validation.md)。
 
 ## 安全边界
 
-ForgeOS v0.1.0 假设只有**一名受信任的本地操作者**，不声称能够抵御敌对的多租户环境。
+ForgeOS v0.1.1 假设只有**一名受信任的本地操作者**，不声称能够抵御敌对的多租户环境。
 
 - UI 只绑定 `127.0.0.1`，没有账户系统或公网入口。
 - 模型密钥以 Compose secret 挂载，不进入 Git、镜像、事件、日志或任务容器。
@@ -136,7 +136,7 @@ ForgeOS v0.1.0 假设只有**一名受信任的本地操作者**，不声称能�
 
 - [`docs/architecture.md`](./docs/architecture.md) — 状态模型、交付图与服务职责
 - [`docs/operations.md`](./docs/operations.md) — 恢复、备份、验证与密钥轮换
-- [`docs/validation.md`](./docs/validation.md) — v0.1.0 验证记录
+- [`docs/validation.md`](./docs/validation.md) — v0.1.x 验证记录
 - [`docs/threat-model.md`](./docs/threat-model.md) — 信任假设与安全边界
 
 ## 许可证

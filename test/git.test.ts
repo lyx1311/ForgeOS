@@ -36,8 +36,25 @@ describe("GitManager", () => {
     const worktree = await git.createWorktree(repo, join(root, "worktrees"), "task1", 1, base);
     await git.applyChanges(worktree.path, [{ path: "server.mjs", content: "console.log('/health');\n" }]);
     const candidate = await git.commit(worktree.path, "feat: safe update");
+    await expect(git.assertWorktreeAtCommit(worktree.path, candidate)).resolves.toBeUndefined();
+    await expect(git.assertWorktreeAtCommit(worktree.path, base)).rejects.toThrow(/HEAD/u);
     await expect(git.fastForwardMerge(repo, candidate, base, [base])).rejects.toThrow("Evidence");
     await expect(git.fastForwardMerge(repo, candidate, base, [candidate])).resolves.toBe(candidate);
+  });
+
+  it("rejects tracked and untracked changes in a candidate worktree", async () => {
+    const root = await mkdtemp(join(tmpdir(), "forge-integrity-"));
+    const repo = join(root, "repo");
+    await mkdir(repo);
+    const git = new GitManager();
+    const base = await git.scaffold(repo);
+    const tracked = await git.createWorktree(repo, join(root, "worktrees"), "tracked", 1, base);
+    await writeFile(join(tracked.path, "server.mjs"), "console.log('/health changed');\n");
+    await expect(git.assertWorktreeAtCommit(tracked.path, base)).rejects.toThrow(/differs/u);
+
+    const untracked = await git.createWorktree(repo, join(root, "worktrees"), "untracked", 1, base);
+    await writeFile(join(untracked.path, "generated.txt"), "unexpected\n");
+    await expect(git.assertWorktreeAtCommit(untracked.path, base)).rejects.toThrow(/differs/u);
   });
 
   it("refuses symlink traversal", async () => {

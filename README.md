@@ -114,11 +114,11 @@ npm run dev
 npm run dev:broker
 ```
 
-The release validation record includes **45 passing tests**, successful type-check and production build, Compose health, persistence across restart, selective fact invalidation, browser acceptance, and a complete live delivery loop. See [`docs/validation.md`](./docs/validation.md) for the recorded evidence.
+The release validation record includes **50 passing tests**, successful type-check and production build, Compose health, persistence across restart, selective fact invalidation, browser acceptance, and a complete live delivery loop. See [`docs/validation.md`](./docs/validation.md) for the recorded evidence.
 
 ## Security boundaries
 
-ForgeOS v0.1.0 assumes **one trusted local operator**. It does not claim hostile multi-tenant isolation.
+ForgeOS v0.1.1 assumes **one trusted local operator**. It does not claim hostile multi-tenant isolation.
 
 - The UI binds to `127.0.0.1`; there are no accounts or public ingress.
 - The model key is mounted as a Compose secret and is excluded from Git, images, events, logs, and task containers.
@@ -136,7 +136,7 @@ This release targets small, zero-dependency Node web applications built from For
 
 - [`docs/architecture.md`](./docs/architecture.md) — state model, delivery graph, and service responsibilities
 - [`docs/operations.md`](./docs/operations.md) — recovery, backup, validation, and secret rotation
-- [`docs/validation.md`](./docs/validation.md) — v0.1.0 verification record
+- [`docs/validation.md`](./docs/validation.md) — v0.1.x verification record
 - [`docs/threat-model.md`](./docs/threat-model.md) — trust assumptions and security boundaries
 
 ## License

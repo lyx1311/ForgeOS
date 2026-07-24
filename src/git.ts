@@ -137,6 +137,12 @@ export class GitManager {
   status(repository: string): Promise<string> { return command(repository, ["status", "--porcelain"]); }
   async read(repository: string, path: string): Promise<string> { return readFile(await safeTarget(repository, path), "utf8"); }
 
+  async assertWorktreeAtCommit(worktree: string, expectedCommit: string): Promise<void> {
+    const actualCommit = await this.head(worktree);
+    if (actualCommit !== expectedCommit) throw new Error("Worktree HEAD does not match the candidate commit");
+    if ((await this.status(worktree)) !== "") throw new Error("Worktree differs from the candidate commit");
+  }
+
   async fastForwardMerge(repository: string, candidate: string, expectedBase: string, evidenceCommits: string[]): Promise<string> {
     const mainHead = await this.head(repository);
     if (mainHead !== expectedBase) throw new Error("Main advanced; candidate must be revalidated");

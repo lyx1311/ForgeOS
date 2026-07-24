@@ -1,7 +1,7 @@
 name: forgeos
 
 x-forgeos-image: &forgeos-image
-  image: forgeos-local:0.1.0
+  image: forgeos-local:0.1.1
   build:
     context: .
     dockerfile: Dockerfile
