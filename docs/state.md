@@ -1,6 +1,6 @@
 # ForgeOS implementation state
 
-Last updated: 2026-07-19 15:02 America/Halifax
+Last updated: 2026-07-24 Asia/Taipei
 
 ## Current goal
 
@@ -16,6 +16,8 @@ Maintain the released ForgeOS v0.1.0 minimal end-to-end prototype from its persi
 - Previously passed TypeScript checks, build, 32 tests, Compose build/health, and a zero-vulnerability production dependency audit.
 - Added deterministic extraction/planning fallbacks, normalized model candidates, bounded repair/recovery, selective fact invalidation, SHA revalidation, and deploy-only recovery.
 - Completed the two-requirement live loop, merged `feat/mvp` into `main`, migrated runtime repositories to root `.forgeos/workspaces`, rebuilt Compose from `main`, and created annotated tag `v0.1.0`.
+- Redesigned the repository homepage with a project-native visual system, an English default README, and a fully localized Simplified Chinese README.
+- Published the repository to `github.com/lyx1311/ForgeOS` and adopted the Apache License 2.0, including SPDX package metadata and bilingual README notices.
 
 ## Current blocker
 
@@ -24,6 +26,7 @@ Maintain the released ForgeOS v0.1.0 minimal end-to-end prototype from its persi
 ## Pending
 
 - No v0.1.0 release task remains. Future work starts from a new versioned goal and must preserve the event ledger and compatibility boundaries below.
+- No README follow-up remains; both localized documents pass the repository-local image and SVG audit.
 
 ## Important constraints
 

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">ForgeOS control and execution boundaries</title>
+  <desc id="desc">The local operator sends natural-language messages to ForgeOS. ForgeOS owns the event ledger, orchestration, model gateway, and Git state. A narrow authenticated broker alone holds the Docker socket and launches restricted task containers.</desc>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#FF6B35"/></marker></defs>
+  <rect width="1200" height="430" rx="24" fill="#101316"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <text x="54" y="58" fill="#F4F1EA" font-size="34" font-weight="700">Control stays separate from execution</text>
+    <text x="54" y="88" fill="#8F969E" font-size="19">Model output proposes candidates. Deterministic gates own state, Git, evidence, merge, and deployment.</text>
+
+    <g transform="translate(54 132)">
+      <rect width="210" height="220" rx="18" fill="#171B1F" stroke="#343A40"/>
+      <text x="24" y="38" fill="#FF8A5B" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18">TRUSTED LOCAL</text>
+      <text x="24" y="78" fill="#F4F1EA" font-size="25" font-weight="700">Operator</text>
+      <text x="24" y="114" fill="#A7ADB4" font-size="18">Natural-language</text>
+      <text x="24" y="140" fill="#A7ADB4" font-size="18">requirements</text>
+      <rect x="24" y="166" width="162" height="34" rx="17" fill="#262B30"/>
+      <text x="105" y="189" text-anchor="middle" fill="#DCD8D0" font-size="18">127.0.0.1</text>
+    </g>
+
+    <path d="M282 242H326" stroke="#FF6B35" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(342 116)">
+      <rect width="390" height="252" rx="18" fill="#171B1F" stroke="#FF6B35" stroke-width="2"/>
+      <text x="26" y="38" fill="#FF8A5B" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18">FORGEOS SERVICE</text>
+      <text x="26" y="78" fill="#F4F1EA" font-size="27" font-weight="700">Persistent control plane</text>
+      <g fill="#DCD8D0" font-size="19">
+        <text x="28" y="122">● Append-only SQLite ledger</text>
+        <text x="28" y="158">● Versioned facts + task DAG</text>
+        <text x="28" y="194">● Model candidate validation</text>
+        <text x="28" y="230">● Git worktrees + SHA gates</text>
+      </g>
+    </g>
+
+    <path d="M750 242H794" stroke="#FF6B35" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(810 132)">
+      <rect width="336" height="220" rx="18" fill="#171B1F" stroke="#343A40"/>
+      <text x="24" y="38" fill="#FF8A5B" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18">RUNNER BROKER</text>
+      <text x="24" y="78" fill="#F4F1EA" font-size="25" font-weight="700">Narrow execution API</text>
+      <g fill="#DCD8D0" font-size="19">
+        <text x="24" y="120">Docker socket isolated here</text>
+        <text x="24" y="152">Fixed test / build / preview</text>
+        <text x="24" y="184">Restricted, offline containers</text>
+      </g>
+    </g>
+  </g>
+</svg>

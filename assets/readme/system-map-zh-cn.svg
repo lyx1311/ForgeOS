@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">ForgeOS 控制与执行边界</title>
+  <desc id="desc">本地操作者向 ForgeOS 发送自然语言消息。ForgeOS 管理事件账本、编排、模型网关与 Git 状态；只有窄接口执行代理持有 Docker 套接字并启动受限任务容器。</desc>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#FF6B35"/></marker></defs>
+  <rect width="1200" height="430" rx="24" fill="#101316"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif">
+    <text x="54" y="58" fill="#F4F1EA" font-size="34" font-weight="700">控制面与执行面保持分离</text>
+    <text x="54" y="88" fill="#8F969E" font-size="19">模型只提出候选；确定性门禁掌管状态、Git、证据、合并与部署。</text>
+
+    <g transform="translate(54 132)">
+      <rect width="210" height="220" rx="18" fill="#171B1F" stroke="#343A40"/>
+      <text x="24" y="38" fill="#FF8A5B" font-family="ui-monospace,SFMono-Regular,Menlo,'PingFang SC',monospace" font-size="18">受信任本地环境</text>
+      <text x="24" y="78" fill="#F4F1EA" font-size="25" font-weight="700">操作者</text>
+      <text x="24" y="114" fill="#A7ADB4" font-size="18">自然语言</text>
+      <text x="24" y="140" fill="#A7ADB4" font-size="18">需求与决策</text>
+      <rect x="24" y="166" width="162" height="34" rx="17" fill="#262B30"/>
+      <text x="105" y="189" text-anchor="middle" fill="#DCD8D0" font-size="18">127.0.0.1</text>
+    </g>
+
+    <path d="M282 242H326" stroke="#FF6B35" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(342 116)">
+      <rect width="390" height="252" rx="18" fill="#171B1F" stroke="#FF6B35" stroke-width="2"/>
+      <text x="26" y="38" fill="#FF8A5B" font-family="ui-monospace,SFMono-Regular,Menlo,'PingFang SC',monospace" font-size="18">FORGEOS 服务</text>
+      <text x="26" y="78" fill="#F4F1EA" font-size="27" font-weight="700">持久化控制面</text>
+      <g fill="#DCD8D0" font-size="19">
+        <text x="28" y="122">● 只追加 SQLite 事件账本</text>
+        <text x="28" y="158">● 版本化事实 + 任务 DAG</text>
+        <text x="28" y="194">● 模型候选校验</text>
+        <text x="28" y="230">● Git 工作树 + SHA 门禁</text>
+      </g>
+    </g>
+
+    <path d="M750 242H794" stroke="#FF6B35" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(810 132)">
+      <rect width="336" height="220" rx="18" fill="#171B1F" stroke="#343A40"/>
+      <text x="24" y="38" fill="#FF8A5B" font-family="ui-monospace,SFMono-Regular,Menlo,'PingFang SC',monospace" font-size="18">执行代理</text>
+      <text x="24" y="78" fill="#F4F1EA" font-size="25" font-weight="700">窄执行接口</text>
+      <g fill="#DCD8D0" font-size="19">
+        <text x="24" y="120">Docker 套接字仅位于此处</text>
+        <text x="24" y="152">固定测试 / 构建 / 预览操作</text>
+        <text x="24" y="184">受限、离线的任务容器</text>
+      </g>
+    </g>
+  </g>
+</svg>

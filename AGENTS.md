@@ -12,3 +12,4 @@
   - pending tasks
   - important constraints
   - architecture decisions
+- After creating a repository commit, push it to the configured upstream remote unless the user explicitly asks to keep it local.

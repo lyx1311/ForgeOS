@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">ForgeOS — 从意图到证据的持久化软件工程组织</title>
+  <desc id="desc">项目原生流程图：自然语言需求依次转化为版本化方案、隔离代码变更、绑定精确提交的证据和本地预览。</desc>
+  <rect width="1200" height="430" rx="28" fill="#0B0D0F"/>
+  <path d="M0 88H1200M0 352H1200" stroke="#272B30"/>
+  <path d="M810 0V430" stroke="#272B30"/>
+
+  <g transform="translate(60 48)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif">
+    <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18" font-weight="600" letter-spacing="2">
+      <rect width="170" height="32" rx="16" fill="#FF6B35"/>
+      <text x="85" y="22" text-anchor="middle" fill="#0B0D0F">本地运行 · v0.1.0</text>
+    </g>
+    <text y="126" fill="#F4F1EA" font-size="78" font-weight="750" letter-spacing="-3">ForgeOS</text>
+    <text y="177" fill="#F4F1EA" font-size="28" font-weight="600">从意图到证据，持久化运行软件工程。</text>
+    <text y="218" fill="#9BA1A8" font-size="21">描述一个 Node Web 应用，批准执行方案。</text>
+    <text y="249" fill="#9BA1A8" font-size="21">ForgeOS 将实现、测试、审查、合并并启动预览。</text>
+
+    <g transform="translate(0 288)" font-family="ui-monospace,SFMono-Regular,Menlo,'PingFang SC',monospace" font-size="18">
+      <rect width="690" height="68" rx="12" fill="#14171A" stroke="#343A40"/>
+      <circle cx="24" cy="21" r="5" fill="#FF6B35"/>
+      <circle cx="43" cy="21" r="5" fill="#626A73"/>
+      <circle cx="62" cy="21" r="5" fill="#626A73"/>
+      <text x="24" y="49" fill="#D9D5CC"><tspan fill="#FF8A5B">›</tspan> 创建一个支持连续天数统计的习惯追踪器</text>
+    </g>
+  </g>
+
+  <g transform="translate(846 42)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif">
+    <text fill="#9BA1A8" font-family="ui-monospace,SFMono-Regular,Menlo,'PingFang SC',monospace" font-size="18" letter-spacing="1.5">交付账本</text>
+    <path d="M24 52V318" stroke="#343A40" stroke-width="2"/>
+    <g font-size="20" font-weight="650">
+      <g transform="translate(0 66)"><circle cx="24" cy="0" r="9" fill="#FF6B35"/><text x="50" y="7" fill="#F4F1EA">需求分析</text><text x="286" y="7" text-anchor="end" fill="#7F8790" font-size="18">事实</text></g>
+      <g transform="translate(0 114)"><circle cx="24" cy="0" r="9" fill="#FF6B35"/><text x="50" y="7" fill="#F4F1EA">方案批准</text><text x="286" y="7" text-anchor="end" fill="#7F8790" font-size="18">DAG</text></g>
+      <g transform="translate(0 162)"><circle cx="24" cy="0" r="9" fill="#FF6B35"/><text x="50" y="7" fill="#F4F1EA">隔离实现</text><text x="286" y="7" text-anchor="end" fill="#7F8790" font-size="18">工作树</text></g>
+      <g transform="translate(0 210)"><circle cx="24" cy="0" r="9" fill="#FF6B35"/><text x="50" y="7" fill="#F4F1EA">测试 + 审查</text><text x="286" y="7" text-anchor="end" fill="#7F8790" font-size="18">提交</text></g>
+      <g transform="translate(0 258)"><circle cx="24" cy="0" r="9" fill="#FF6B35"/><text x="50" y="7" fill="#F4F1EA">快进合并</text><text x="286" y="7" text-anchor="end" fill="#7F8790" font-size="18">主分支</text></g>
+      <g transform="translate(0 306)"><circle cx="24" cy="0" r="12" fill="#0B0D0F" stroke="#FF6B35" stroke-width="4"/><circle cx="24" cy="0" r="4" fill="#FF6B35"/><text x="50" y="7" fill="#F4F1EA">本地预览</text><text x="286" y="7" text-anchor="end" fill="#FF8A5B" font-size="18">就绪</text></g>
+    </g>
+  </g>
+</svg>
